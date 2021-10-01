@@ -1,0 +1,16 @@
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\Automatas.exe
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\Automatas.deps.json
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\Automatas.runtimeconfig.json
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\Automatas.runtimeconfig.dev.json
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\Automatas.dll
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\ref\Automatas.dll
+C:\Users\l1914\Documents\Automatas\bin\Debug\net5.0\Automatas.pdb
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.csproj.AssemblyReference.cache
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.AssemblyInfoInputs.cache
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.AssemblyInfo.cs
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.csproj.CoreCompileInputs.cache
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.dll
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\ref\Automatas.dll
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.pdb
+C:\Users\l1914\Documents\Automatas\obj\Debug\net5.0\Automatas.genruntimeconfig.cache

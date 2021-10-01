@@ -8,7 +8,7 @@ namespace Automatas
         {
             try
             {
-                using (Lenguaje l = new Lenguaje("C:\\Archivos\\prueba.cpp"))
+                using (Lenguaje l = new Lenguaje("C:\\Archivos\\suma.cpp"))
                 {
                     l.Programa();
                 }

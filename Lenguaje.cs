@@ -262,9 +262,11 @@ namespace Automatas
                     {
                         MaxBytes = tipoDatoExpresion(float.Parse(valor));
                     }
+
                     if (MaxBytes > l.getTipoDato(nombre))
                     {
                         throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+
                     }
                 }
                 if (ejecuta)
@@ -558,7 +560,6 @@ namespace Automatas
                 {
                     MaxBytes = tipoDatoExpresion(float.Parse(getContenido()));
                 }
-
                 match(clasificaciones.numero);
             }
             else
@@ -637,7 +638,7 @@ namespace Automatas
 
         private Variable.tipo tipoDatoExpresion(float valor)
         {
-            if (valor % 2 != 0)
+            if (valor % 1 != 0)
             {
                 return Variable.tipo.FLOAT;
             }
