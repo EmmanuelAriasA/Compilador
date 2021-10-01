@@ -6,7 +6,18 @@ namespace Automatas
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            try
+            {
+                using (Lenguaje l = new Lenguaje("C:\\Archivos\\prueba.cpp"))
+                {
+                    l.Programa();
+                }
+            }
+            catch (Error e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            Console.ReadKey();
         }
     }
 }
