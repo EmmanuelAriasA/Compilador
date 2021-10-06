@@ -565,8 +565,37 @@ namespace Automatas
             else
             {
                 match("(");
+
+                bool huboCast = false;
+                Variable.tipo tipoDato = Variable.tipo.CHAR;
+                if (getClasificacion() == clasificaciones.tipoDato)
+                {
+                    huboCast = true;
+                    tipoDato = determinarTipoDato(getContenido());
+                    match(clasificaciones.tipoDato);
+                    match(")");
+                    match("(");
+                }
                 Expresion();
                 match(")");
+
+                if (huboCast)
+                {
+                    //Hacer un pop y convertir ese número al tipo dato y meterlo al stack
+                    float n1 = s.pop(bitacora, linea, caracter);
+                    //Para convertir un int a char necesitamos dividir entre 256 y el residuo
+                    //Es el resultado del cast. 256 = 0, 257 = 1, 258 = 2, ...
+                    //Para convertir un float a int necesitamos dividir entre 65536 y el residuo
+                    //Es el resultado del cast.
+                    //Para convertir un float a otro tipo de dato redondear el número para eliminar
+                    //la parte fraccional.
+                    //Para convertir un float a char necesitamos dividir entre 65536/256 y el residuo
+                    //Es el resultado del cast.
+                    //Para convertir a float n1 = n1.
+                    //n1 = cast(n1, tipoDato);
+                    s.push(n1, bitacora, linea, caracter);
+                    MaxBytes = tipoDato;
+                }
             }
         }
 
@@ -652,6 +681,32 @@ namespace Automatas
             }
 
             return Variable.tipo.FLOAT;
+        }
+
+        private Variable.tipo determinarTipoDato(string tipoDato)
+        {
+            Variable.tipo tipoVar;
+
+            switch (tipoDato)
+            {
+                case "int":
+                    tipoVar = Variable.tipo.INT;
+                    break;
+
+                case "float":
+                    tipoVar = Variable.tipo.FLOAT;
+                    break;
+
+                case "string":
+                    tipoVar = Variable.tipo.STRING;
+                    break;
+
+                default:
+                    tipoVar = Variable.tipo.CHAR;
+                    break;
+            }
+
+            return tipoVar;
         }
     }
 }
