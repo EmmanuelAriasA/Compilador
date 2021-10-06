@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-//  Requerimiento 1: Implementar el not en el if.
+// ✓ Requerimiento 1: Implementar el not en el if.
 //
 //  Requerimiento 2: Validar la asignación de strings en instrucción.
 //
@@ -11,7 +11,7 @@ using System.Text;
 //  Requerimiento 4: Validar los tipos de datos en la asignación del cin.
 //
 //  Requerimiento 5: Implementar el cast.
-// ✓
+// 
 
 namespace Automatas
 {
@@ -419,10 +419,20 @@ namespace Automatas
         // If -> if (Condicion) { BloqueInstrucciones } (else BloqueInstrucciones)?
         private void If(bool ejecuta2)
         {
+            bool ejecuta;
             match("if");
             match("(");
-            bool ejecuta = Condicion();
-            Console.WriteLine(ejecuta);
+            if (getContenido() == "!")
+            {
+                match(clasificaciones.operadorLogico);
+                match("(");
+                ejecuta = !Condicion();
+                match(")");
+            }
+            else
+            {
+                ejecuta = Condicion();
+            }
             match(")");
             BloqueInstrucciones(ejecuta && ejecuta2);
 
