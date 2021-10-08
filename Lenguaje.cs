@@ -4,13 +4,13 @@ using System.Text;
 
 // ✓ Requerimiento 1: Implementar el not en el if.
 //
-//  Requerimiento 2: Validar la asignación de strings en instrucción.
+// ✓ Requerimiento 2: Validar la asignación de strings en instrucción.
 //
-//  Requerimiento 3: Implementar la comparación de tipo de datos en Lista_IDs.
+// ✓ Requerimiento 3: Implementar la comparación de tipo de datos en Lista_IDs.
 // 
-//  Requerimiento 4: Validar los tipos de datos en la asignación del cin.
+// ✓ Requerimiento 4: Validar los tipos de datos en la asignación del cin.
 //
-//  Requerimiento 5: Implementar el cast.
+// ✓ Requerimiento 5: Implementar el cast.
 // 
 
 namespace Automatas
@@ -92,43 +92,55 @@ namespace Automatas
             string nombre = getContenido();
             if (!l.Existe(nombre))
             {
-                l.Inserta(nombre, TIPO);
                 match(clasificaciones.identificador);
             }
             else
             {
                 throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") está duplicada" + "(" + linea + ", " + caracter + ")");
             }
+            l.Inserta(nombre, TIPO);
 
 
             if (getClasificacion() == clasificaciones.asignacion)
             {
-
                 match(clasificaciones.asignacion);
+
                 if (getClasificacion() == clasificaciones.cadena)
                 {
                     if (TIPO == Variable.tipo.STRING)
                     {
-                        string cadena = getContenido();
                         if (ejecuta)
                         {
+                            string cadena = getContenido();
                             l.setValor(nombre, cadena);
                         }
                         match(clasificaciones.cadena);
                     }
                     else
                     {
-                        throw new Error(bitacora, "Error semantico: No se puede asignar un STRING a un (" + TIPO + ")" + "(" + linea + ", " + caracter + ")");
+                        throw new Error(bitacora, "Error semantico1: No se puede asignar un STRING a un (" + TIPO + ")" + "(" + linea + ", " + caracter + ")");
                     }
                 }
                 else
                 {
                     //Requerimiento 3
-                    MaxBytes = Variable.tipo.CHAR;
                     Expresion();
+                    MaxBytes = Variable.tipo.CHAR;
+
+                    string valor;
+                    valor = s.pop(bitacora, linea, caracter).ToString();
+
+                    if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
+                    {
+                        MaxBytes = tipoDatoExpresion(float.Parse(valor));
+                    }
+                    if (MaxBytes > TIPO)
+                    {
+                        throw new Error(bitacora, "Error semantico2: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+                    }
                     if (ejecuta)
                     {
-                        l.setValor(nombre, s.pop(bitacora, linea, caracter).ToString());
+                        l.setValor(nombre, valor);
                     }
                 }
             }
@@ -207,8 +219,19 @@ namespace Automatas
                 {
                     if (ejecuta)
                     {
-                        string valor = Console.ReadLine();
                         match(clasificaciones.identificador); // Validar existencia
+                        string valor = Console.ReadLine();
+
+                        if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
+                        {
+                            MaxBytes = tipoDatoExpresion(float.Parse(valor));
+                        }
+
+                        if (MaxBytes > l.getTipoDato(nombre))
+                        {
+                            throw new Error(bitacora, "Error semantico3: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+
+                        }
                         l.setValor(nombre, valor);
                     }
                 }
@@ -249,7 +272,19 @@ namespace Automatas
                 if (getClasificacion() == clasificaciones.cadena)
                 {
                     valor = getContenido();
-                    match(clasificaciones.cadena);
+                    if (l.getTipoDato(nombre) == Variable.tipo.STRING)
+                    {
+                        valor = getContenido();
+                        if (ejecuta)
+                        {
+                            l.setValor(nombre, valor);
+                        }
+                        match(clasificaciones.cadena);
+                    }
+                    else
+                    {
+                        throw new Error(bitacora, "Error semantico4: No se puede asignar un STRING a un (" + l.getTipoDato(nombre) + ")" + "(" + linea + ", " + caracter + ")");
+                    }
                 }
                 else
                 {
@@ -265,15 +300,15 @@ namespace Automatas
 
                     if (MaxBytes > l.getTipoDato(nombre))
                     {
-                        throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+                        throw new Error(bitacora, "Error semantico5: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
 
                     }
                 }
                 if (ejecuta)
                 {
                     l.setValor(nombre, valor);
-                    match(clasificaciones.finSentencia);
                 }
+                match(clasificaciones.finSentencia);
             }
         }
 
@@ -542,7 +577,6 @@ namespace Automatas
         {
             if (getClasificacion() == clasificaciones.identificador)
             {
-                //Console.Write(getContenido() + " ");
                 string nombre = getContenido();
                 if (!l.Existe(nombre))
                 {
@@ -562,7 +596,6 @@ namespace Automatas
             }
             else if (getClasificacion() == clasificaciones.numero)
             {
-                // Console.Write(getContenido() + " ");
                 s.push(float.Parse(getContenido()), bitacora, linea, caracter);
                 s.display(bitacora);
 
@@ -593,16 +626,7 @@ namespace Automatas
                 {
                     //Hacer un pop y convertir ese número al tipo dato y meterlo al stack
                     float n1 = s.pop(bitacora, linea, caracter);
-                    //Para convertir un int a char necesitamos dividir entre 256 y el residuo
-                    //Es el resultado del cast. 256 = 0, 257 = 1, 258 = 2, ...
-                    //Para convertir un float a int necesitamos dividir entre 65536 y el residuo
-                    //Es el resultado del cast.
-                    //Para convertir un float a otro tipo de dato redondear el número para eliminar
-                    //la parte fraccional.
-                    //Para convertir un float a char necesitamos dividir entre 65536/256 y el residuo
-                    //Es el resultado del cast.
-                    //Para convertir a float n1 = n1.
-                    //n1 = cast(n1, tipoDato);
+                    n1 = casteo(tipoDato, n1);
                     s.push(n1, bitacora, linea, caracter);
                     MaxBytes = tipoDato;
                 }
@@ -717,6 +741,50 @@ namespace Automatas
             }
 
             return tipoVar;
+        }
+
+        private float casteo(Variable.tipo TipoDato, float n1)
+        {
+            float Resultado;
+            switch (tipoDatoExpresion(n1))
+            {
+                case Variable.tipo.INT:
+                    if (TipoDato == Variable.tipo.CHAR)
+                    {
+                        Resultado = n1 % 256;
+                        return Resultado;
+                    }
+                    else
+                    {
+                        return n1;
+                    }
+
+                case Variable.tipo.FLOAT:
+                    if (TipoDato == Variable.tipo.FLOAT)
+                    {
+                        return n1;
+                    }
+                    else if (TipoDato == Variable.tipo.INT)
+                    {
+                        Resultado = (int)Math.Round(n1);
+                        Resultado = Resultado % 65536;
+                        return Resultado;
+                    }
+                    else if (TipoDato == Variable.tipo.CHAR)
+                    {
+                        Resultado = (char)Math.Round(n1);
+                        Resultado = Resultado % 65536;
+                        Resultado = Resultado % 256;
+                        return Resultado;
+                    }
+                    else
+                    {
+                        Resultado = (int)Math.Round(n1);
+                        return Resultado;
+                    }
+                default:
+                    return n1;
+            }
         }
     }
 }
