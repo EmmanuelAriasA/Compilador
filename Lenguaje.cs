@@ -3,15 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 
 // ✓ Requerimiento 1: Implementar el not en el if.
-//
 // ✓ Requerimiento 2: Validar la asignación de strings en instrucción.
-//
 // ✓ Requerimiento 3: Implementar la comparación de tipo de datos en Lista_IDs.
-// 
 // ✓ Requerimiento 4: Validar los tipos de datos en la asignación del cin.
-//
 // ✓ Requerimiento 5: Implementar el cast.
-// 
 
 namespace Automatas
 {
@@ -78,7 +73,6 @@ namespace Automatas
         // BloqueInstrucciones -> { Instrucciones }
         private void BloqueInstrucciones(bool ejecuta)
         {
-
             match(clasificaciones.inicioBloque);
 
             Instrucciones(ejecuta);
@@ -150,7 +144,6 @@ namespace Automatas
                 match(",");
                 Lista_IDs(TIPO, ejecuta);
             }
-
         }
 
         // Variables -> tipoDato Lista_IDs; 
@@ -230,7 +223,6 @@ namespace Automatas
                         if (MaxBytes > l.getTipoDato(nombre))
                         {
                             throw new Error(bitacora, "Error semantico3: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
-
                         }
                         l.setValor(nombre, valor);
                     }
@@ -265,7 +257,6 @@ namespace Automatas
                 }
 
                 match(clasificaciones.asignacion);
-
                 string valor;
 
                 // Requerimiento 2
@@ -301,7 +292,6 @@ namespace Automatas
                     if (MaxBytes > l.getTipoDato(nombre))
                     {
                         throw new Error(bitacora, "Error semantico5: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
-
                     }
                 }
                 if (ejecuta)
@@ -326,7 +316,6 @@ namespace Automatas
         // Constante -> const tipoDato identificador = numero | cadena;
         private void Constante(bool ejecuta)
         {
-
             match("const");
             string tipoDato = getContenido();
             match(clasificaciones.tipoDato);
@@ -441,7 +430,6 @@ namespace Automatas
                         Console.Write(l.getValor(nombre));
                     }
                     match(clasificaciones.identificador); // Validar existencia
-
                 }
             }
 
@@ -518,6 +506,7 @@ namespace Automatas
             Termino();
             MasTermino();
         }
+
         // MasTermino -> (operadorTermino Termino)?
         private void MasTermino()
         {
@@ -542,12 +531,14 @@ namespace Automatas
                 s.display(bitacora);
             }
         }
+
         // Termino -> Factor PorFactor
         private void Termino()
         {
             Factor();
             PorFactor();
         }
+
         // PorFactor -> (operadorFactor Factor)?
         private void PorFactor()
         {
@@ -557,7 +548,6 @@ namespace Automatas
                 match(clasificaciones.operadorFactor);
                 Factor();
                 float e1 = s.pop(bitacora, linea, caracter), e2 = s.pop(bitacora, linea, caracter);
-                // Console.Write(operador + " ");
 
                 switch (operador)
                 {
@@ -568,10 +558,10 @@ namespace Automatas
                         s.push(e2 / e1, bitacora, linea, caracter);
                         break;
                 }
-
                 s.display(bitacora);
             }
         }
+
         // Factor -> identificador | numero | ( Expresion )
         private void Factor()
         {
@@ -637,7 +627,6 @@ namespace Automatas
         private void For(bool ejecuta)
         {
             match("for");
-
             match("(");
 
             string nombre = getContenido();
@@ -666,9 +655,7 @@ namespace Automatas
                 match(clasificaciones.identificador); // Validar existencia
             }
             match(clasificaciones.incrementoTermino);
-
             match(")");
-
             BloqueInstrucciones(ejecuta);
         }
 
@@ -676,11 +663,9 @@ namespace Automatas
         private void While(bool ejecuta)
         {
             match("while");
-
             match("(");
             Condicion();
             match(")");
-
             BloqueInstrucciones(ejecuta);
         }
 
@@ -688,11 +673,8 @@ namespace Automatas
         private void DoWhile(bool ejecuta)
         {
             match("do");
-
             BloqueInstrucciones(ejecuta);
-
             match("while");
-
             match("(");
             Condicion();
             match(")");
@@ -713,7 +695,6 @@ namespace Automatas
             {
                 return Variable.tipo.INT;
             }
-
             return Variable.tipo.FLOAT;
         }
 
@@ -739,7 +720,6 @@ namespace Automatas
                     tipoVar = Variable.tipo.CHAR;
                     break;
             }
-
             return tipoVar;
         }
 
@@ -758,7 +738,6 @@ namespace Automatas
                     {
                         return n1;
                     }
-
                 case Variable.tipo.FLOAT:
                     if (TipoDato == Variable.tipo.FLOAT)
                     {
