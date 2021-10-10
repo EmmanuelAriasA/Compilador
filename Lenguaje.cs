@@ -94,7 +94,6 @@ namespace Automatas
             }
             l.Inserta(nombre, TIPO);
 
-
             if (getClasificacion() == clasificaciones.asignacion)
             {
                 match(clasificaciones.asignacion);
@@ -265,7 +264,6 @@ namespace Automatas
                     valor = getContenido();
                     if (l.getTipoDato(nombre) == Variable.tipo.STRING)
                     {
-                        valor = getContenido();
                         if (ejecuta)
                         {
                             l.setValor(nombre, valor);
