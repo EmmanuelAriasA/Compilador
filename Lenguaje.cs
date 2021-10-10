@@ -90,7 +90,7 @@ namespace Automatas
             }
             else
             {
-                throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") está duplicada" + "(" + linea + ", " + caracter + ")");
+                throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") está duplicada " + "(" + linea + ", " + caracter + ")");
             }
             l.Inserta(nombre, TIPO);
 
@@ -112,7 +112,7 @@ namespace Automatas
                     }
                     else
                     {
-                        throw new Error(bitacora, "Error semantico1: No se puede asignar un STRING a un (" + TIPO + ")" + "(" + linea + ", " + caracter + ")");
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un STRING a un " + TIPO + " (" + linea + ", " + caracter + ")");
                     }
                 }
                 else
@@ -130,7 +130,7 @@ namespace Automatas
                     }
                     if (MaxBytes > TIPO)
                     {
-                        throw new Error(bitacora, "Error semantico2: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
                     }
                     if (ejecuta)
                     {
@@ -206,13 +206,13 @@ namespace Automatas
                 string nombre = getContenido();
                 if (!l.Existe(nombre))
                 {
-                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + "(" + linea + ", " + caracter + ")");
+                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + " (" + linea + ", " + caracter + ")");
                 }
                 else
                 {
                     if (ejecuta)
                     {
-                        match(clasificaciones.identificador); // Validar existencia
+                        match(clasificaciones.identificador);
                         string valor = Console.ReadLine();
 
                         if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
@@ -222,7 +222,7 @@ namespace Automatas
 
                         if (MaxBytes > l.getTipoDato(nombre))
                         {
-                            throw new Error(bitacora, "Error semantico3: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+                            throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
                         }
                         l.setValor(nombre, valor);
                     }
@@ -249,11 +249,11 @@ namespace Automatas
                 string nombre = getContenido();
                 if (!l.Existe(nombre))
                 {
-                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + "(" + linea + ", " + caracter + ")");
+                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada " + "(" + linea + ", " + caracter + ")");
                 }
                 else
                 {
-                    match(clasificaciones.identificador); // Validar existencia
+                    match(clasificaciones.identificador);
                 }
 
                 match(clasificaciones.asignacion);
@@ -274,7 +274,7 @@ namespace Automatas
                     }
                     else
                     {
-                        throw new Error(bitacora, "Error semantico4: No se puede asignar un STRING a un (" + l.getTipoDato(nombre) + ")" + "(" + linea + ", " + caracter + ")");
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un STRING a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
                     }
                 }
                 else
@@ -291,7 +291,7 @@ namespace Automatas
 
                     if (MaxBytes > l.getTipoDato(nombre))
                     {
-                        throw new Error(bitacora, "Error semantico5: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + "(" + linea + ", " + caracter + ")");
+                        throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
                     }
                 }
                 if (ejecuta)
@@ -347,12 +347,12 @@ namespace Automatas
             string nombre = getContenido();
             if (!l.Existe(nombre) && ejecuta)
             {
-                match(clasificaciones.identificador); // Validar duplicidad
+                match(clasificaciones.identificador);
                 l.Inserta(nombre, Tipo, true);
             }
             else
             {
-                throw new Error(bitacora, "Error de sintaxis:La constante (" + nombre + ") está duplicada" + "(" + linea + ", " + caracter + ")");
+                throw new Error(bitacora, "Error de sintaxis:La constante (" + nombre + ") está duplicada " + "(" + linea + ", " + caracter + ")");
             }
 
             match(clasificaciones.asignacion);
@@ -421,7 +421,7 @@ namespace Automatas
                 string nombre = getContenido();
                 if (!l.Existe(nombre))
                 {
-                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + "(" + linea + ", " + caracter + ")");
+                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada " + "(" + linea + ", " + caracter + ")");
                 }
                 else
                 {
@@ -429,7 +429,7 @@ namespace Automatas
                     {
                         Console.Write(l.getValor(nombre));
                     }
-                    match(clasificaciones.identificador); // Validar existencia
+                    match(clasificaciones.identificador);
                 }
             }
 
@@ -490,9 +490,6 @@ namespace Automatas
                     return n1 <= n2;
                 case "==":
                     return n1 == n2;
-                case "!=":
-                case "<>":
-                    return n1 != n2;
 
                 default:
                     return n1 != n2;
@@ -570,13 +567,13 @@ namespace Automatas
                 string nombre = getContenido();
                 if (!l.Existe(nombre))
                 {
-                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + "(" + linea + ", " + caracter + ")");
+                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada " + "(" + linea + ", " + caracter + ")");
                 }
                 else
                 {
                     s.push(float.Parse(l.getValor(getContenido())), bitacora, linea, caracter);
                     s.display(bitacora);
-                    match(clasificaciones.identificador); // Validar existencia
+                    match(clasificaciones.identificador);
 
                     if (l.getTipoDato(nombre) > MaxBytes)
                     {
@@ -614,6 +611,7 @@ namespace Automatas
 
                 if (huboCast)
                 {
+                    //Requerimiento 5
                     //Hacer un pop y convertir ese número al tipo dato y meterlo al stack
                     float n1 = s.pop(bitacora, linea, caracter);
                     n1 = casteo(tipoDato, n1);
@@ -632,11 +630,11 @@ namespace Automatas
             string nombre = getContenido();
             if (!l.Existe(nombre))
             {
-                throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + "(" + linea + ", " + caracter + ")");
+                throw new Error(bitacora, "Error de sintaxis:La variable " + nombre + " no está declarada " + "(" + linea + ", " + caracter + ")");
             }
             else
             {
-                match(clasificaciones.identificador); // Validar existencia
+                match(clasificaciones.identificador);
             }
             match(clasificaciones.asignacion);
             Expresion();
@@ -648,11 +646,11 @@ namespace Automatas
             string nombre2 = getContenido();
             if (!l.Existe(nombre2))
             {
-                throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre2 + ") no está declarada" + "(" + linea + ", " + caracter + ")");
+                throw new Error(bitacora, "Error de sintaxis:La variable " + nombre2 + " no está declarada " + "(" + linea + ", " + caracter + ")");
             }
             else
             {
-                match(clasificaciones.identificador); // Validar existencia
+                match(clasificaciones.identificador);
             }
             match(clasificaciones.incrementoTermino);
             match(")");
@@ -723,6 +721,11 @@ namespace Automatas
             return tipoVar;
         }
 
+        //Para convertir un int a char se divide /256 y el residuo es el resultado del cast 256 = 0, 257 = 1,...
+        //Para convertir un float a int se divide /65536 y el residuo es el resultado del cast.
+        //Para convertir un float a char se divide /65535 /256  y el residuo es el resultado del cast 256 = 0, 257 = 1,...
+        //Para convertir un float a otro redondear el numero para eliminar la parte fraccional 
+        //Para convertir a float n1 = n1.
         private float casteo(Variable.tipo TipoDato, float n1)
         {
             float Resultado;
@@ -738,6 +741,7 @@ namespace Automatas
                     {
                         return n1;
                     }
+
                 case Variable.tipo.FLOAT:
                     if (TipoDato == Variable.tipo.FLOAT)
                     {
@@ -761,6 +765,7 @@ namespace Automatas
                         Resultado = (int)Math.Round(n1);
                         return Resultado;
                     }
+
                 default:
                     return n1;
             }
