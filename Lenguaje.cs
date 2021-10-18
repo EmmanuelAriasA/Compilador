@@ -737,7 +737,7 @@ namespace Automatas
                     }
                     else
                     {
-                        return n1;
+       
                     }
 
                 case Variable.tipo.FLOAT:
@@ -769,4 +769,4 @@ namespace Automatas
             }
         }
     }
-}
+
