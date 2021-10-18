@@ -9,6 +9,7 @@ namespace Automatas
     {
         private StreamReader archivo;
         protected StreamWriter bitacora;
+        protected StreamWriter asm;
         string nombreArchivo;
         protected int linea, caracter;
         const int F = -1;
@@ -69,6 +70,9 @@ namespace Automatas
                 bitacora = new StreamWriter("C:\\Archivos\\prueba.log");
                 bitacora.AutoFlush = true;
 
+                asm = new StreamWriter("C:\\Archivos\\prueba.asm");
+                asm.AutoFlush = true;
+
                 DateTime fechaActual = DateTime.Now;
 
                 bitacora.WriteLine("Archivo: prueba.cpp");
@@ -79,7 +83,6 @@ namespace Automatas
             {
                 throw new Exception("El archivo prueba.cpp no existe.");
             }
-
         }
         public Lexico(string nombre)
         {
@@ -104,11 +107,19 @@ namespace Automatas
                 bitacora = new StreamWriter(log);
                 bitacora.AutoFlush = true;
 
+                string ensambla = Path.ChangeExtension(nombre, "asm");
+                asm = new StreamWriter(ensambla);
+                asm.AutoFlush = true;
+
                 DateTime fechaActual = DateTime.Now;
 
                 bitacora.WriteLine("Archivo: " + nombreArchivo);
                 bitacora.WriteLine("Directorio: " + nombreDir);
                 bitacora.WriteLine("Fecha: " + fechaActual);
+
+                asm.WriteLine("; Archivo: " + nombreArchivo);
+                asm.WriteLine("; Directorio: " + nombreDir);
+                asm.WriteLine("; Fecha: " + fechaActual);
             }
             else
             {
@@ -128,6 +139,7 @@ namespace Automatas
         {
             archivo.Close();
             bitacora.Close();
+            asm.Close();
         }
 
         protected void NextToken()

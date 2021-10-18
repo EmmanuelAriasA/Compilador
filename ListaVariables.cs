@@ -58,12 +58,23 @@ namespace Automatas
             return Variable.tipo.CHAR;
         }
 
-        public void imprime(StreamWriter bitacora)
+        public void imprime(StreamWriter bitacora, StreamWriter asm)
         {
-            bitacora.WriteLine("Lista de varibales");
+            bitacora.WriteLine("Lista de variables:");
+
             foreach (Variable x in lista)
             {
                 bitacora.WriteLine(x.getNombre() + " " + x.getValor() + " " + x.getTipoDato() + " " + (x.getEsConstante() ? "Constante" : "Variable"));
+                asm.Write(x.getNombre() + " ");
+
+                if (x.getTipoDato() == Variable.tipo.CHAR)
+                {
+                    asm.WriteLine("db" + " ");
+                }
+                else
+                {
+                    asm.WriteLine("dw" + " ");
+                }
             }
         }
     }

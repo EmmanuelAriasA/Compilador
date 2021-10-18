@@ -32,11 +32,13 @@ namespace Automatas
         // Programa -> Libreria Main
         public void Programa()
         {
+            asm.WriteLine("org 100h");
             Libreria();
             Main();
-            l.imprime(bitacora);
+            asm.WriteLine("ret");
+            asm.WriteLine("; variables");
+            l.imprime(bitacora, asm);
         }
-
         // Libreria -> (#include <identificador(.h)?> Libreria) ?
         private void Libreria()
         {
@@ -94,6 +96,7 @@ namespace Automatas
             }
             l.Inserta(nombre, TIPO);
 
+
             if (getClasificacion() == clasificaciones.asignacion)
             {
                 match(clasificaciones.asignacion);
@@ -122,6 +125,7 @@ namespace Automatas
 
                     string valor;
                     valor = s.pop(bitacora, linea, caracter).ToString();
+                    asm.WriteLine("pop");
 
                     if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
                     {
@@ -264,6 +268,7 @@ namespace Automatas
                     valor = getContenido();
                     if (l.getTipoDato(nombre) == Variable.tipo.STRING)
                     {
+                        valor = getContenido();
                         if (ejecuta)
                         {
                             l.setValor(nombre, valor);
@@ -281,6 +286,7 @@ namespace Automatas
                     MaxBytes = Variable.tipo.CHAR;
                     Expresion();
                     valor = s.pop(bitacora, linea, caracter).ToString();
+                    asm.WriteLine("pop");
 
                     if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
                     {
@@ -470,11 +476,13 @@ namespace Automatas
             MaxBytes = Variable.tipo.CHAR;
             Expresion();
             float n1 = s.pop(bitacora, linea, caracter);
+            asm.WriteLine("pop");
             string operador = getContenido();
             match(clasificaciones.operadorRelacional);
             MaxBytes = Variable.tipo.CHAR;
             Expresion();
             float n2 = s.pop(bitacora, linea, caracter);
+            asm.WriteLine("pop");
 
             switch (operador)
             {
@@ -511,15 +519,17 @@ namespace Automatas
                 match(clasificaciones.operadorTermino);
                 Termino();
                 float e1 = s.pop(bitacora, linea, caracter), e2 = s.pop(bitacora, linea, caracter);
-                // Console.Write(operador + " ");
+                asm.WriteLine("pop");
 
                 switch (operador)
                 {
                     case "+":
                         s.push(e2 + e1, bitacora, linea, caracter);
+                        asm.WriteLine("push");
                         break;
                     case "-":
                         s.push(e2 - e1, bitacora, linea, caracter);
+                        asm.WriteLine("push");
                         break;
                 }
 
@@ -543,14 +553,17 @@ namespace Automatas
                 match(clasificaciones.operadorFactor);
                 Factor();
                 float e1 = s.pop(bitacora, linea, caracter), e2 = s.pop(bitacora, linea, caracter);
+                asm.WriteLine("pop");
 
                 switch (operador)
                 {
                     case "*":
                         s.push(e2 * e1, bitacora, linea, caracter);
+                        asm.WriteLine("push");
                         break;
                     case "/":
                         s.push(e2 / e1, bitacora, linea, caracter);
+                        asm.WriteLine("push");
                         break;
                 }
                 s.display(bitacora);
@@ -570,6 +583,7 @@ namespace Automatas
                 else
                 {
                     s.push(float.Parse(l.getValor(getContenido())), bitacora, linea, caracter);
+                    asm.WriteLine("push");
                     s.display(bitacora);
                     match(clasificaciones.identificador);
 
@@ -582,6 +596,7 @@ namespace Automatas
             else if (getClasificacion() == clasificaciones.numero)
             {
                 s.push(float.Parse(getContenido()), bitacora, linea, caracter);
+                asm.WriteLine("push");
                 s.display(bitacora);
 
                 if (tipoDatoExpresion(float.Parse(getContenido())) > MaxBytes)
@@ -612,8 +627,10 @@ namespace Automatas
                     //Requerimiento 5
                     //Hacer un pop y convertir ese número al tipo dato y meterlo al stack
                     float n1 = s.pop(bitacora, linea, caracter);
+                    asm.WriteLine("pop");
                     n1 = casteo(tipoDato, n1);
                     s.push(n1, bitacora, linea, caracter);
+                    asm.WriteLine("push");
                     MaxBytes = tipoDato;
                 }
             }
@@ -737,7 +754,7 @@ namespace Automatas
                     }
                     else
                     {
-       
+                        return n1;
                     }
 
                 case Variable.tipo.FLOAT:
@@ -769,4 +786,4 @@ namespace Automatas
             }
         }
     }
-
+}
