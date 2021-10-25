@@ -69,11 +69,11 @@ namespace Automatas
 
                 if (x.getTipoDato() == Variable.tipo.CHAR)
                 {
-                    asm.WriteLine("db" + " ");
+                    asm.WriteLine("db" + " 0");
                 }
                 else
                 {
-                    asm.WriteLine("dw" + " ");
+                    asm.WriteLine("dw" + " 0");
                 }
             }
         }

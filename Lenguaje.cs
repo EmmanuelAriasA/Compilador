@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 
 //   Requerimiento 1: Programar el residuo de la division en PorFactor
-//                    para c++ y ensamblador.
+//                    para C++ y ensamblador y hacer un salto de linea cuando
+//                    se imprima un "\n".
+//   Requerimiento 2: Programar (en ensamblador) el else. Nota: será necesario 
+//                    agregar etiquetas para el else.
+//   Requerimiento 3: Agregar la negación de la condición.
+//   Requerimiento 4: Declarar Variables en el For (int i).
+//   Requerimiento 5: Actualizar la variable del for con "+=" y "-=".
 // ✓ 
 
 namespace Automatas
@@ -13,10 +19,13 @@ namespace Automatas
         Stack s;
         ListaVariables l;
         Variable.tipo MaxBytes;
+        int numeroIf;
+        int numeroFor;
         public Lenguaje()
         {
             s = new Stack(5);
             l = new ListaVariables();
+            numeroIf = numeroFor = 0;
             Console.WriteLine("Iniciando analisis gramatical.");
         }
 
@@ -24,16 +33,22 @@ namespace Automatas
         {
             s = new Stack(5);
             l = new ListaVariables();
+            numeroIf = numeroFor = 0;
             Console.WriteLine("Iniciando analisis gramatical.");
         }
 
         // Programa -> Libreria Main
         public void Programa()
         {
+            asm.WriteLine("include \"emu8086.inc\"");
             asm.WriteLine("org 100h");
             Libreria();
             Main();
             asm.WriteLine("ret");
+            asm.WriteLine("define_print_string");
+            asm.WriteLine("define_print_num");
+            asm.WriteLine("define_print_num_uns");
+            asm.WriteLine("define_scan_num");
             asm.WriteLine("; variables");
             l.imprime(bitacora, asm);
         }
@@ -123,7 +138,7 @@ namespace Automatas
 
                     string valor;
                     valor = s.pop(bitacora, linea, caracter).ToString();
-                    asm.WriteLine("\tPOP AX");
+                    asm.WriteLine("\tPOP CX");
 
                     if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
                     {
@@ -133,9 +148,11 @@ namespace Automatas
                     {
                         throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
                     }
+
+                    asm.WriteLine("\tMOV " + nombre + ", CX");
+
                     if (ejecuta)
                     {
-                        asm.WriteLine("\tMOV AX, " + nombre);
                         l.setValor(nombre, valor);
                     }
                 }
@@ -206,12 +223,17 @@ namespace Automatas
                 match(clasificaciones.flujoEntrada);
 
                 string nombre = getContenido();
+
+
                 if (!l.Existe(nombre))
                 {
                     throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") no está declarada" + " (" + linea + ", " + caracter + ")");
                 }
                 else
                 {
+                    asm.WriteLine("\tcall scan_num");
+                    asm.WriteLine("\tMOV " + nombre + ", CX");
+                    asm.WriteLine("\tprintn \" \" ");
                     if (ejecuta)
                     {
                         match(clasificaciones.identificador);
@@ -297,9 +319,11 @@ namespace Automatas
                         throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
                     }
                 }
+
+                asm.WriteLine("\tMOV " + nombre + ", CX");
+
                 if (ejecuta)
                 {
-                    asm.WriteLine("\tMOV " + nombre + ", CX");
                     l.setValor(nombre, valor);
                 }
                 match(clasificaciones.finSentencia);
@@ -389,6 +413,9 @@ namespace Automatas
 
             if (getClasificacion() == clasificaciones.numero)
             {
+                asm.WriteLine("\t MOV AX, " + getContenido());
+                asm.WriteLine("\t call print_num");
+
                 if (ejecuta)
                 {
                     Console.Write(getContenido());
@@ -399,6 +426,7 @@ namespace Automatas
             {
 
                 string cadena = getContenido();
+                asm.WriteLine("\tprint " + getContenido());
                 if (cadena.Contains("\""))
                 {
                     cadena = cadena.Replace("\"", "");
@@ -429,6 +457,9 @@ namespace Automatas
                 }
                 else
                 {
+                    asm.WriteLine("\t MOV AX, " + nombre);
+                    asm.WriteLine("\t call print_num");
+
                     if (ejecuta)
                     {
                         Console.Write(l.getValor(nombre));
@@ -447,22 +478,23 @@ namespace Automatas
         private void If(bool ejecuta2)
         {
             bool ejecuta;
+            string etiqueta = "if" + numeroIf++;
             match("if");
             match("(");
             if (getContenido() == "!")
             {
                 match(clasificaciones.operadorLogico);
                 match("(");
-                ejecuta = !Condicion();
+                ejecuta = !Condicion(etiqueta);
                 match(")");
             }
             else
             {
-                ejecuta = Condicion();
+                ejecuta = Condicion(etiqueta);
             }
             match(")");
             BloqueInstrucciones(ejecuta && ejecuta2);
-
+            asm.WriteLine(etiqueta + ":");
             if (getContenido() == "else")
             {
                 match("else");
@@ -471,12 +503,12 @@ namespace Automatas
         }
 
         // Condicion -> Expresion operadorRelacional Expresion
-        private bool Condicion()
+        private bool Condicion(string etiqueta)
         {
             MaxBytes = Variable.tipo.CHAR;
             Expresion();
             float n1 = s.pop(bitacora, linea, caracter);
-            asm.WriteLine("\tPOP AX");
+            asm.WriteLine("\tPOP CX");
             string operador = getContenido();
             match(clasificaciones.operadorRelacional);
             MaxBytes = Variable.tipo.CHAR;
@@ -484,20 +516,28 @@ namespace Automatas
             float n2 = s.pop(bitacora, linea, caracter);
             asm.WriteLine("\tPOP BX");
 
+            asm.WriteLine("\tCMP CX, BX");
+
             switch (operador)
             {
                 case ">":
+                    asm.WriteLine("\tJLE " + etiqueta);
                     return n1 > n2;
                 case ">=":
+                    asm.WriteLine("\tJL " + etiqueta);
                     return n1 >= n2;
                 case "<":
+                    asm.WriteLine("\tJGE " + etiqueta);
                     return n1 < n2;
                 case "<=":
+                    asm.WriteLine("\tJG " + etiqueta);
                     return n1 <= n2;
                 case "==":
+                    asm.WriteLine("\tJNE " + etiqueta);
                     return n1 == n2;
 
                 default:
+                    asm.WriteLine("\tJE " + etiqueta);
                     return n1 != n2;
             }
         }
@@ -519,8 +559,8 @@ namespace Automatas
                 match(clasificaciones.operadorTermino);
                 Termino();
                 float e1 = s.pop(bitacora, linea, caracter), e2 = s.pop(bitacora, linea, caracter);
-                asm.WriteLine("\tPOP AX");
                 asm.WriteLine("\tPOP BX");
+                asm.WriteLine("\tPOP AX");
                 switch (operador)
                 {
                     case "+":
@@ -529,7 +569,7 @@ namespace Automatas
                         asm.WriteLine("\tPUSH AX");
                         break;
                     case "-":
-                        asm.WriteLine("\tADD AX, BX");
+                        asm.WriteLine("\tSUB AX, BX");
                         s.push(e2 - e1, bitacora, linea, caracter);
                         asm.WriteLine("\tPUSH AX");
                         break;
@@ -645,12 +685,15 @@ namespace Automatas
         }
 
         // For -> for (identificador = Expresion; Condicion; identificador incrementoTermino) BloqueInstrucciones
-        private void For(bool ejecuta)
+        private void For(bool ejecuta2)
         {
+
             match("for");
             match("(");
 
             string nombre = getContenido();
+            bool ejecuta;
+
             if (!l.Existe(nombre))
             {
                 throw new Error(bitacora, "Error de sintaxis:La variable " + nombre + " no está declarada " + "(" + linea + ", " + caracter + ")");
@@ -659,25 +702,78 @@ namespace Automatas
             {
                 match(clasificaciones.identificador);
             }
+
             match(clasificaciones.asignacion);
+
+            MaxBytes = Variable.tipo.CHAR;
             Expresion();
+            string valor = s.pop(bitacora, linea, caracter).ToString();
+            asm.WriteLine("\tPOP CX");
+
+            if (tipoDatoExpresion(float.Parse(valor)) > MaxBytes)
+            {
+                MaxBytes = tipoDatoExpresion(float.Parse(valor));
+            }
+
+            if (MaxBytes > l.getTipoDato(nombre))
+            {
+                throw new Error(bitacora, "Error semantico: No se puede asignar un " + MaxBytes + " a un " + l.getTipoDato(nombre) + " (" + linea + ", " + caracter + ")");
+            }
+
+            asm.WriteLine("\tMOV " + nombre + ", CX");
+            l.setValor(nombre, valor);
+
             match(clasificaciones.finSentencia);
 
-            Condicion();
+            string etiquetaFin = "endFor" + numeroFor;
+            string etiquetaInicio = "beginFor" + numeroFor++;
+            asm.WriteLine(etiquetaInicio + ":");
+            ejecuta = Condicion(etiquetaFin);
             match(clasificaciones.finSentencia);
 
             string nombre2 = getContenido();
+            match(clasificaciones.identificador);
+
             if (!l.Existe(nombre2))
             {
                 throw new Error(bitacora, "Error de sintaxis:La variable " + nombre2 + " no está declarada " + "(" + linea + ", " + caracter + ")");
             }
-            else
-            {
-                match(clasificaciones.identificador);
-            }
+
+            string operador = getContenido();
             match(clasificaciones.incrementoTermino);
+
+            if (operador == "++")
+            {
+                l.setValor(nombre, (float.Parse(l.getValor(nombre)) + 1).ToString());
+                asm.WriteLine("\tINC " + nombre);
+            }
+            else if (operador == "--")
+            {
+                l.setValor(nombre, (float.Parse(l.getValor(nombre)) - 1).ToString());
+                 asm.WriteLine("\tDEC " + nombre);
+            }
+            else if (operador == "+=")
+            {
+                string numero = getContenido();
+                match(clasificaciones.numero);
+
+                l.setValor(nombre, (float.Parse(l.getValor(nombre)) + float.Parse(numero)).ToString());
+                
+            }
+            else if (operador == "-=")
+            {
+                string numero = getContenido();
+                match(clasificaciones.numero);
+
+                l.setValor(nombre, (float.Parse(l.getValor(nombre)) - float.Parse(numero)).ToString());
+
+            }
+
             match(")");
-            BloqueInstrucciones(ejecuta);
+            BloqueInstrucciones(ejecuta && ejecuta2);
+
+            asm.WriteLine("\tjmp " + etiquetaInicio);
+            asm.WriteLine(etiquetaFin + ":");
         }
 
         // While -> while (Condicion) BloqueInstrucciones
@@ -685,7 +781,7 @@ namespace Automatas
         {
             match("while");
             match("(");
-            Condicion();
+            Condicion("");
             match(")");
             BloqueInstrucciones(ejecuta);
         }
@@ -697,7 +793,7 @@ namespace Automatas
             BloqueInstrucciones(ejecuta);
             match("while");
             match("(");
-            Condicion();
+            Condicion("");
             match(")");
             match(clasificaciones.finSentencia);
         }
