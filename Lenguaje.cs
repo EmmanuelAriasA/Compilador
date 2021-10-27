@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-//   Requerimiento 1: Programar el residuo de la division en PorFactor
+// ✓  Requerimiento 1: Programar el residuo de la division en PorFactor
 //                    para C++ y ensamblador y hacer un salto de linea cuando
 //                    se imprima un "\n".
-//   Requerimiento 2: Programar (en ensamblador) el else. Nota: será necesario 
+// ✓  Requerimiento 2: Programar (en ensamblador) el else. Nota: será necesario 
 //                    agregar etiquetas para el else.
-//   Requerimiento 3: Agregar la negación de la condición.
-//   Requerimiento 4: Declarar Variables en el For (int i).
-//   Requerimiento 5: Actualizar la variable del for con "+=" y "-=".
+//    Requerimiento 3: Agregar la negación de la condición.
+// ✓  Requerimiento 4: Declarar Variables en el For (int i).
+// ✓  Requerimiento 5: Actualizar la variable del for con "+=" y "-=".
 // ✓ 
 
 namespace Automatas
@@ -21,11 +21,12 @@ namespace Automatas
         Variable.tipo MaxBytes;
         int numeroIf;
         int numeroFor;
+        int numeroElse;
         public Lenguaje()
         {
             s = new Stack(5);
             l = new ListaVariables();
-            numeroIf = numeroFor = 0;
+            numeroIf = numeroFor = numeroElse = 0;
             Console.WriteLine("Iniciando analisis gramatical.");
         }
 
@@ -33,7 +34,7 @@ namespace Automatas
         {
             s = new Stack(5);
             l = new ListaVariables();
-            numeroIf = numeroFor = 0;
+            numeroIf = numeroFor = numeroElse = 0;
             Console.WriteLine("Iniciando analisis gramatical.");
         }
 
@@ -233,7 +234,7 @@ namespace Automatas
                 {
                     asm.WriteLine("\tcall scan_num");
                     asm.WriteLine("\tMOV " + nombre + ", CX");
-                    asm.WriteLine("\tprintn \" \" ");
+                    asm.WriteLine("\tprintn \"\"");
                     if (ejecuta)
                     {
                         match(clasificaciones.identificador);
@@ -426,22 +427,22 @@ namespace Automatas
             {
 
                 string cadena = getContenido();
-                asm.WriteLine("\tprint " + getContenido());
+                string cadena2 = "\tprint " + getContenido();
+
                 if (cadena.Contains("\""))
                 {
                     cadena = cadena.Replace("\"", "");
                 }
                 if (cadena.Contains("\\n"))
                 {
-                    cadena = cadena.Replace("\\n", "");
-                    Console.Write("\n");
+                    cadena = cadena.Replace("\\n", "\n");
+                    cadena2 = cadena2.Replace("\\n", "\"\n\t printn \"");
                 }
                 if (cadena.Contains("\\t"))
                 {
-                    cadena = cadena.Replace("\\t", "");
-                    Console.Write("\t");
+                    cadena = cadena.Replace("\\t", "\t");
                 }
-
+                asm.WriteLine(cadena2);
                 if (ejecuta)
                 {
                     Console.Write(cadena);
@@ -477,34 +478,45 @@ namespace Automatas
         // If -> if (Condicion) { BloqueInstrucciones } (else BloqueInstrucciones)?
         private void If(bool ejecuta2)
         {
-            bool ejecuta;
+            bool ejecuta, negacion = false;
             string etiqueta = "if" + numeroIf++;
+            string etiqueta2 = "else" + numeroElse++;
+
             match("if");
             match("(");
             if (getContenido() == "!")
             {
                 match(clasificaciones.operadorLogico);
                 match("(");
-                ejecuta = !Condicion(etiqueta);
+                ejecuta = !Condicion(etiqueta, negacion);
                 match(")");
             }
             else
             {
-                ejecuta = Condicion(etiqueta);
+                ejecuta = Condicion(etiqueta, !negacion);
             }
             match(")");
             BloqueInstrucciones(ejecuta && ejecuta2);
             asm.WriteLine(etiqueta + ":");
+
             if (getContenido() == "else")
             {
+                if (ejecuta)
+                {
+                    asm.WriteLine("\tJMP " + etiqueta2);
+                }
+
                 match("else");
                 BloqueInstrucciones(!ejecuta && ejecuta2);
+                asm.WriteLine(etiqueta2 + ":");
             }
         }
 
         // Condicion -> Expresion operadorRelacional Expresion
-        private bool Condicion(string etiqueta)
+        private bool Condicion(string etiqueta, bool negacion)
         {
+
+            string salto;
             MaxBytes = Variable.tipo.CHAR;
             Expresion();
             float n1 = s.pop(bitacora, linea, caracter);
@@ -518,26 +530,33 @@ namespace Automatas
 
             asm.WriteLine("\tCMP CX, BX");
 
+
             switch (operador)
             {
                 case ">":
-                    asm.WriteLine("\tJLE " + etiqueta);
+                    salto = negacion ? "JLE" : "JG";
+                    asm.WriteLine("\t" + salto + " " + etiqueta);
                     return n1 > n2;
                 case ">=":
-                    asm.WriteLine("\tJL " + etiqueta);
+                    salto = negacion ? "JL" : "JGE";
+                    asm.WriteLine("\t" + salto + " " + etiqueta);
                     return n1 >= n2;
                 case "<":
-                    asm.WriteLine("\tJGE " + etiqueta);
+                    salto = negacion ? "JGE" : "JL";
+                    asm.WriteLine("\t" + salto + " " + etiqueta);
                     return n1 < n2;
                 case "<=":
-                    asm.WriteLine("\tJG " + etiqueta);
+                    salto = negacion ? "JG" : "JLE";
+                    asm.WriteLine("\t" + salto + " " + etiqueta);
                     return n1 <= n2;
                 case "==":
-                    asm.WriteLine("\tJNE " + etiqueta);
+                    salto = negacion ? "JNE" : "JE";
+                    asm.WriteLine("\t" + salto + " " + etiqueta);
                     return n1 == n2;
 
                 default:
-                    asm.WriteLine("\tJE " + etiqueta);
+                    salto = negacion ? "JE" : "JNE";
+                    asm.WriteLine("\t" + salto + " " + etiqueta);
                     return n1 != n2;
             }
         }
@@ -609,6 +628,11 @@ namespace Automatas
                         asm.WriteLine("\tDIV BX");
                         s.push(e2 / e1, bitacora, linea, caracter);
                         asm.WriteLine("\tPUSH AX");
+                        break;
+                    case "%":
+                        asm.WriteLine("\tDIV BX");
+                        s.push(e2 % e1, bitacora, linea, caracter);
+                        asm.WriteLine("\tPUSH DX");
                         break;
                 }
                 s.display(bitacora);
@@ -692,7 +716,9 @@ namespace Automatas
             match("(");
 
             string nombre = getContenido();
-            bool ejecuta;
+            bool ejecuta, negacion = false;
+            string etiquetaFin = "endFor" + numeroFor;
+            string etiquetaInicio = "beginFor" + numeroFor++;
 
             if (getClasificacion() == clasificaciones.tipoDato)
             {
@@ -707,16 +733,17 @@ namespace Automatas
                 }
                 else
                 {
-                    throw new Error(bitacora, "Error de sintaxis:La constante (" + nombre + ") está duplicada " + "(" + linea + ", " + caracter + ")");
+                    throw new Error(bitacora, "Error de sintaxis:La variable (" + nombre + ") está duplicada " + "(" + linea + ", " + caracter + ")");
                 }
-            }
-            else if (!l.Existe(nombre))
-            {
-                throw new Error(bitacora, "Error de sintaxis:La variable " + nombre + " no está declarada " + "(" + linea + ", " + caracter + ")");
             }
             else
             {
+                nombre = getContenido();
                 match(clasificaciones.identificador);
+                if (!l.Existe(nombre))
+                {
+                    throw new Error(bitacora, "Error de sintaxis:La variable " + nombre + " no está declarada " + "(" + linea + ", " + caracter + ")");
+                }
             }
 
             match(clasificaciones.asignacion);
@@ -740,12 +767,22 @@ namespace Automatas
             l.setValor(nombre, valor);
 
             match(clasificaciones.finSentencia);
-
-            string etiquetaFin = "endFor" + numeroFor;
-            string etiquetaInicio = "beginFor" + numeroFor++;
             asm.WriteLine(etiquetaInicio + ":");
-            ejecuta = Condicion(etiquetaFin);
+
+            if (getContenido() == "!")
+            {
+                match(clasificaciones.operadorLogico);
+                match("(");
+                ejecuta = !Condicion(etiquetaFin, negacion);
+                match(")");
+            }
+            else
+            {
+                ejecuta = Condicion(etiquetaFin, !negacion);
+            }
+
             match(clasificaciones.finSentencia);
+
 
             string nombre2 = getContenido();
             match(clasificaciones.identificador);
@@ -773,7 +810,7 @@ namespace Automatas
                 string numero = getContenido();
                 match(clasificaciones.numero);
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) + float.Parse(numero)).ToString());
-                asm.WriteLine("\tADD, " + nombre);
+                asm.WriteLine("\tADD " + nombre + ", " + numero);
 
             }
             else if (operador == "-=")
@@ -781,7 +818,7 @@ namespace Automatas
                 string numero = getContenido();
                 match(clasificaciones.numero);
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) - float.Parse(numero)).ToString());
-                asm.WriteLine("\tSUB, " + nombre);
+                asm.WriteLine("\tSUB " + nombre + ", " + numero);
             }
 
             match(")");
@@ -796,7 +833,7 @@ namespace Automatas
         {
             match("while");
             match("(");
-            Condicion("");
+            Condicion("", true);
             match(")");
             BloqueInstrucciones(ejecuta);
         }
@@ -808,7 +845,7 @@ namespace Automatas
             BloqueInstrucciones(ejecuta);
             match("while");
             match("(");
-            Condicion("");
+            Condicion("", true);
             match(")");
             match(clasificaciones.finSentencia);
         }
