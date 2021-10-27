@@ -694,7 +694,23 @@ namespace Automatas
             string nombre = getContenido();
             bool ejecuta;
 
-            if (!l.Existe(nombre))
+            if (getClasificacion() == clasificaciones.tipoDato)
+            {
+                string tipo = getContenido();
+                match(clasificaciones.tipoDato);
+                nombre = getContenido();
+
+                if (!l.Existe(nombre))
+                {
+                    match(clasificaciones.identificador);
+                    l.Inserta(nombre, determinarTipoDato(tipo));
+                }
+                else
+                {
+                    throw new Error(bitacora, "Error de sintaxis:La constante (" + nombre + ") está duplicada " + "(" + linea + ", " + caracter + ")");
+                }
+            }
+            else if (!l.Existe(nombre))
             {
                 throw new Error(bitacora, "Error de sintaxis:La variable " + nombre + " no está declarada " + "(" + linea + ", " + caracter + ")");
             }
@@ -750,23 +766,22 @@ namespace Automatas
             else if (operador == "--")
             {
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) - 1).ToString());
-                 asm.WriteLine("\tDEC " + nombre);
+                asm.WriteLine("\tDEC " + nombre);
             }
             else if (operador == "+=")
             {
                 string numero = getContenido();
                 match(clasificaciones.numero);
-
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) + float.Parse(numero)).ToString());
-                
+                asm.WriteLine("\tADD, " + nombre);
+
             }
             else if (operador == "-=")
             {
                 string numero = getContenido();
                 match(clasificaciones.numero);
-
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) - float.Parse(numero)).ToString());
-
+                asm.WriteLine("\tSUB, " + nombre);
             }
 
             match(")");
