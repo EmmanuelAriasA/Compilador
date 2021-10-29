@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 // ✓  Requerimiento 1: Programar el residuo de la division en PorFactor
-//                    para C++ y ensamblador y hacer un salto de linea cuando
+//                    para C++ y ensamblador y hacer un modo de linea cuando
 //                    se imprima un "\n".
 // ✓  Requerimiento 2: Programar (en ensamblador) el else. Nota: será necesario 
 //                    agregar etiquetas para el else.
@@ -478,9 +478,8 @@ namespace Automatas
         // If -> if (Condicion) { BloqueInstrucciones } (else BloqueInstrucciones)?
         private void If(bool ejecuta2)
         {
-            bool ejecuta, negacion = false;
+            bool ejecuta, negacion = true;
             string etiqueta = "if" + numeroIf++;
-            string etiqueta2 = "else" + numeroElse++;
 
             match("if");
             match("(");
@@ -488,35 +487,34 @@ namespace Automatas
             {
                 match(clasificaciones.operadorLogico);
                 match("(");
-                ejecuta = !Condicion(etiqueta, negacion);
+                ejecuta = Condicion(etiqueta, negacion);
                 match(")");
             }
             else
             {
                 ejecuta = Condicion(etiqueta, !negacion);
             }
+
             match(")");
             BloqueInstrucciones(ejecuta && ejecuta2);
-            asm.WriteLine(etiqueta + ":");
 
             if (getContenido() == "else")
             {
-                if (ejecuta)
-                {
-                    asm.WriteLine("\tJMP " + etiqueta2);
-                }
-
                 match("else");
+                string etiqueta2 = "else" + numeroElse++;
+                asm.WriteLine("\tJMP " + etiqueta2);
+                asm.WriteLine(etiqueta + ":");
+
                 BloqueInstrucciones(!ejecuta && ejecuta2);
                 asm.WriteLine(etiqueta2 + ":");
+                return;
             }
+            asm.WriteLine(etiqueta + ":");
         }
 
         // Condicion -> Expresion operadorRelacional Expresion
         private bool Condicion(string etiqueta, bool negacion)
         {
-
-            string salto;
             MaxBytes = Variable.tipo.CHAR;
             Expresion();
             float n1 = s.pop(bitacora, linea, caracter);
@@ -534,30 +532,71 @@ namespace Automatas
             switch (operador)
             {
                 case ">":
-                    salto = negacion ? "JLE" : "JG";
-                    asm.WriteLine("\t" + salto + " " + etiqueta);
-                    return n1 > n2;
+                    if (negacion == true)
+                    {
+                        asm.WriteLine("\tJG " + etiqueta);
+                        return n1 <= n2;
+                    }
+                    else
+                    {
+                        asm.WriteLine("\tJLE " + etiqueta);
+                        return n1 > n2;
+                    }
                 case ">=":
-                    salto = negacion ? "JL" : "JGE";
-                    asm.WriteLine("\t" + salto + " " + etiqueta);
-                    return n1 >= n2;
+                    if (negacion == true)
+                    {
+                        asm.WriteLine("\tJGE " + etiqueta);
+                        return n1 < n2;
+                    }
+                    else
+                    {
+                        asm.WriteLine("\tJL " + etiqueta);
+                        return n1 >= n2;
+                    }
                 case "<":
-                    salto = negacion ? "JGE" : "JL";
-                    asm.WriteLine("\t" + salto + " " + etiqueta);
-                    return n1 < n2;
+                    if (negacion == true)
+                    {
+                        asm.WriteLine("\tJL " + etiqueta);
+                        return n1 >= n2;
+                    }
+                    else
+                    {
+                        asm.WriteLine("\tJGE " + etiqueta);
+                        return n1 < n2;
+                    }
                 case "<=":
-                    salto = negacion ? "JG" : "JLE";
-                    asm.WriteLine("\t" + salto + " " + etiqueta);
-                    return n1 <= n2;
+                    if (negacion == true)
+                    {
+                        asm.WriteLine("\tJLE " + etiqueta);
+                        return n1 > n2;
+                    }
+                    else
+                    {
+                        asm.WriteLine("\tJG " + etiqueta);
+                        return n1 <= n2;
+                    }
                 case "==":
-                    salto = negacion ? "JNE" : "JE";
-                    asm.WriteLine("\t" + salto + " " + etiqueta);
-                    return n1 == n2;
-
+                    if (negacion == true)
+                    {
+                        asm.WriteLine("\tJE " + etiqueta);
+                        return n1 != n2;
+                    }
+                    else
+                    {
+                        asm.WriteLine("\tJNE " + etiqueta);
+                        return n1 == n2;
+                    }
                 default:
-                    salto = negacion ? "JE" : "JNE";
-                    asm.WriteLine("\t" + salto + " " + etiqueta);
-                    return n1 != n2;
+                    if (negacion == true)
+                    {
+                        asm.WriteLine("\tJNE " + etiqueta);
+                        return n1 == n2;
+                    }
+                    else
+                    {
+                        asm.WriteLine("\tJE " + etiqueta);
+                        return n1 != n2;
+                    }
             }
         }
 
@@ -716,7 +755,7 @@ namespace Automatas
             match("(");
 
             string nombre = getContenido();
-            bool ejecuta, negacion = false;
+            bool ejecuta, negacion = true;
             string etiquetaFin = "endFor" + numeroFor;
             string etiquetaInicio = "beginFor" + numeroFor++;
 
@@ -773,7 +812,7 @@ namespace Automatas
             {
                 match(clasificaciones.operadorLogico);
                 match("(");
-                ejecuta = !Condicion(etiquetaFin, negacion);
+                ejecuta = Condicion(etiquetaFin, negacion);
                 match(")");
             }
             else
@@ -794,23 +833,24 @@ namespace Automatas
 
             string operador = getContenido();
             match(clasificaciones.incrementoTermino);
+            string operadores = "";
 
             if (operador == "++")
             {
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) + 1).ToString());
-                asm.WriteLine("\tINC " + nombre);
+                operadores = "\tINC " + nombre;
             }
             else if (operador == "--")
             {
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) - 1).ToString());
-                asm.WriteLine("\tDEC " + nombre);
+                operadores = "\tDEC " + nombre;
             }
             else if (operador == "+=")
             {
                 string numero = getContenido();
                 match(clasificaciones.numero);
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) + float.Parse(numero)).ToString());
-                asm.WriteLine("\tADD " + nombre + ", " + numero);
+                operadores = "\tADD " + nombre + ", " + numero;
 
             }
             else if (operador == "-=")
@@ -818,12 +858,13 @@ namespace Automatas
                 string numero = getContenido();
                 match(clasificaciones.numero);
                 l.setValor(nombre, (float.Parse(l.getValor(nombre)) - float.Parse(numero)).ToString());
-                asm.WriteLine("\tSUB " + nombre + ", " + numero);
+                operadores = "\tSUB " + nombre + ", " + numero;
             }
 
             match(")");
             BloqueInstrucciones(ejecuta && ejecuta2);
-
+            
+            asm.WriteLine(operadores);
             asm.WriteLine("\tjmp " + etiquetaInicio);
             asm.WriteLine(etiquetaFin + ":");
         }
