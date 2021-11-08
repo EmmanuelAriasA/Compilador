@@ -133,7 +133,6 @@ namespace Automatas
                 }
                 else
                 {
-                    //Requerimiento 3
                     Expresion();
                     MaxBytes = Variable.tipo.CHAR;
 
@@ -219,7 +218,6 @@ namespace Automatas
             }
             else if (getContenido() == "cin")
             {
-                // Requerimiento 4
                 match("cin");
                 match(clasificaciones.flujoEntrada);
 
@@ -284,7 +282,6 @@ namespace Automatas
                 match(clasificaciones.asignacion);
                 string valor;
 
-                // Requerimiento 2
                 if (getClasificacion() == clasificaciones.cadena)
                 {
                     valor = getContenido();
@@ -304,7 +301,6 @@ namespace Automatas
                 }
                 else
                 {
-                    // Requerimiento 3
                     MaxBytes = Variable.tipo.CHAR;
                     Expresion();
                     valor = s.pop(bitacora, linea, caracter).ToString();
@@ -425,7 +421,6 @@ namespace Automatas
             }
             else if (getClasificacion() == clasificaciones.cadena)
             {
-
                 string cadena = getContenido();
                 string cadena2 = "\tprint " + getContenido();
 
@@ -443,6 +438,7 @@ namespace Automatas
                     cadena = cadena.Replace("\\t", "\t");
                 }
                 asm.WriteLine(cadena2);
+
                 if (ejecuta)
                 {
                     Console.Write(cadena);
@@ -734,8 +730,6 @@ namespace Automatas
 
                 if (huboCast)
                 {
-                    //Requerimiento 5
-                    //Hacer un pop y convertir ese número al tipo dato y meterlo al stack
                     float n1 = s.pop(bitacora, linea, caracter);
                     asm.WriteLine("\tPOP BX");
                     n1 = casteo(tipoDato, n1);
@@ -863,7 +857,7 @@ namespace Automatas
 
             match(")");
             BloqueInstrucciones(ejecuta && ejecuta2);
-            
+
             asm.WriteLine(operadores);
             asm.WriteLine("\tjmp " + etiquetaInicio);
             asm.WriteLine(etiquetaFin + ":");
